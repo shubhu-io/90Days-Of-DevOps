@@ -247,3 +247,9 @@ Deliverables in this folder: `day-08-cloud-deployment.md` (this file), `nginx-lo
 - How to view service logs using `journalctl` + request logs via `/var/log/nginx/`.
 - How to transfer files securely using SCP (PEM same folder me hona chahiye).
 - Basic web server deployment and log management; docroot OS ke hisaab se badalta hai.
+
+## Screenshots
+
+![ssh-connection](screenshots/ssh-connection.png)
+![nginx-webpage](screenshots/nginx-webpage.png)
+![docker-nginx](screenshots/docker-nginx.png)
