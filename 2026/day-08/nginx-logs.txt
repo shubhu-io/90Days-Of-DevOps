@@ -1,0 +1,70 @@
+===== journalctl (nginx service) =====
+Oct 11 06:06:31 ip-172-31-10-67.ap-south-1.compute.internal systemd[1]: Stopping nginx.service - The nginx HTTP and reverse proxy server...
+Oct 11 06:06:31 ip-172-31-10-67.ap-south-1.compute.internal systemd[1]: nginx.service: Deactivated successfully.
+Oct 11 06:06:31 ip-172-31-10-67.ap-south-1.compute.internal systemd[1]: Stopped nginx.service - The nginx HTTP and reverse proxy server.
+-- Boot 41c3e17a9b23477fb0d3c847eb16c094 --
+Oct 11 10:57:15 ip-172-31-10-67.ap-south-1.compute.internal systemd[1]: Starting nginx.service - The nginx HTTP and reverse proxy server...
+Oct 11 10:57:15 ip-172-31-10-67.ap-south-1.compute.internal nginx[5556]: nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
+Oct 11 10:57:15 ip-172-31-10-67.ap-south-1.compute.internal nginx[5556]: nginx: configuration file /etc/nginx/nginx.conf test is successful
+Oct 11 10:57:15 ip-172-31-10-67.ap-south-1.compute.internal nginx[5557]: nginx: [emerg] bind() to 0.0.0.0:80 failed (98: Address already in use)
+Oct 11 10:57:15 ip-172-31-10-67.ap-south-1.compute.internal nginx[5557]: nginx: [emerg] bind() to [::]:80 failed (98: Address already in use)
+Oct 11 10:57:16 ip-172-31-10-67.ap-south-1.compute.internal nginx[5557]: nginx: [emerg] bind() to 0.0.0.0:80 failed (98: Address already in use)
+Oct 11 10:57:16 ip-172-31-10-67.ap-south-1.compute.internal nginx[5557]: nginx: [emerg] bind() to [::]:80 failed (98: Address already in use)
+Oct 11 10:57:16 ip-172-31-10-67.ap-south-1.compute.internal nginx[5557]: nginx: [emerg] bind() to 0.0.0.0:80 failed (98: Address already in use)
+Oct 11 10:57:16 ip-172-31-10-67.ap-south-1.compute.internal nginx[5557]: nginx: [emerg] bind() to [::]:80 failed (98: Address already in use)
+Oct 11 10:57:17 ip-172-31-10-67.ap-south-1.compute.internal nginx[5557]: nginx: [emerg] bind() to 0.0.0.0:80 failed (98: Address already in use)
+Oct 11 10:57:17 ip-172-31-10-67.ap-south-1.compute.internal nginx[5557]: nginx: [emerg] bind() to [::]:80 failed (98: Address already in use)
+Oct 11 10:57:17 ip-172-31-10-67.ap-south-1.compute.internal nginx[5557]: nginx: [emerg] bind() to 0.0.0.0:80 failed (98: Address already in use)
+Oct 11 10:57:17 ip-172-31-10-67.ap-south-1.compute.internal nginx[5557]: nginx: [emerg] bind() to [::]:80 failed (98: Address already in use)
+Oct 11 10:57:18 ip-172-31-10-67.ap-south-1.compute.internal nginx[5557]: nginx: [emerg] still could not bind()
+Oct 11 10:57:18 ip-172-31-10-67.ap-south-1.compute.internal systemd[1]: nginx.service: Control process exited, code=exited, status=1/FAILURE
+Oct 11 10:57:18 ip-172-31-10-67.ap-south-1.compute.internal systemd[1]: nginx.service: Failed with result 'exit-code'.
+Oct 11 10:57:18 ip-172-31-10-67.ap-south-1.compute.internal systemd[1]: Failed to start nginx.service - The nginx HTTP and reverse proxy server.
+
+===== access.log (last 50) =====
+::1 - - [11/Oct/2026:05:54:33 +0000] "HEAD / HTTP/1.1" 200 0 "-" "curl/8.21.0" "-"
+::1 - - [11/Oct/2026:05:55:16 +0000] "GET / HTTP/1.1" 200 896 "-" "curl/8.21.0" "-"
+::1 - - [11/Oct/2026:05:55:34 +0000] "GET / HTTP/1.1" 200 896 "-" "curl/8.21.0" "-"
+101.32.15.141 - - [11/Oct/2026:05:57:38 +0000] "GET / HTTP/1.1" 200 896 "-" "Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1" "-"
+43.131.45.213 - - [11/Oct/2026:06:01:24 +0000] "GET / HTTP/1.1" 200 896 "-" "Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1" "-"
+::1 - - [11/Oct/2026:06:02:19 +0000] "GET / HTTP/1.1" 200 362 "-" "curl/8.21.0" "-"
+::1 - - [11/Oct/2026:06:04:43 +0000] "HEAD / HTTP/1.1" 200 0 "-" "curl/8.21.0" "-"
+
+===== error.log (last 50) =====
+2026/10/11 05:54:05 [notice] 22098#22098: using the "epoll" event method
+2026/10/11 05:54:05 [notice] 22098#22098: nginx/1.30.5
+2026/10/11 05:54:05 [notice] 22098#22098: built by gcc 11.5.0 20240719 (Red Hat 11.5.0-5) (GCC) 
+2026/10/11 05:54:05 [notice] 22098#22098: OS: Linux 6.18.51-120.163.amzn2023.x86_64
+2026/10/11 05:54:05 [notice] 22098#22098: getrlimit(RLIMIT_NOFILE): 65535:65535
+2026/10/11 05:54:05 [notice] 22132#22132: start worker processes
+2026/10/11 05:54:05 [notice] 22132#22132: start worker process 22133
+2026/10/11 05:54:05 [notice] 22132#22132: start worker process 22134
+2026/10/11 06:06:31 [notice] 22132#22132: signal 3 (SIGQUIT) received from 1, shutting down
+2026/10/11 06:06:31 [notice] 22133#22133: gracefully shutting down
+2026/10/11 06:06:31 [notice] 22133#22133: exiting
+2026/10/11 06:06:31 [notice] 22133#22133: exit
+2026/10/11 06:06:31 [notice] 22134#22134: gracefully shutting down
+2026/10/11 06:06:31 [notice] 22134#22134: exiting
+2026/10/11 06:06:31 [notice] 22134#22134: exit
+2026/10/11 06:06:31 [notice] 22132#22132: signal 17 (SIGCHLD) received from 22133
+2026/10/11 06:06:31 [notice] 22132#22132: worker process 22133 exited with code 0
+2026/10/11 06:06:31 [notice] 22132#22132: signal 29 (SIGIO) received
+2026/10/11 06:06:31 [notice] 22132#22132: signal 17 (SIGCHLD) received from 22134
+2026/10/11 06:06:31 [notice] 22132#22132: worker process 22134 exited with code 0
+2026/10/11 06:06:31 [notice] 22132#22132: exit
+2026/10/11 10:57:15 [emerg] 5557#5557: bind() to 0.0.0.0:80 failed (98: Address already in use)
+2026/10/11 10:57:15 [emerg] 5557#5557: bind() to [::]:80 failed (98: Address already in use)
+2026/10/11 10:57:15 [notice] 5557#5557: try again to bind() after 500ms
+2026/10/11 10:57:15 [emerg] 5557#5557: bind() to 0.0.0.0:80 failed (98: Address already in use)
+2026/10/11 10:57:15 [emerg] 5557#5557: bind() to [::]:80 failed (98: Address already in use)
+2026/10/11 10:57:15 [notice] 5557#5557: try again to bind() after 500ms
+2026/10/11 10:57:15 [emerg] 5557#5557: bind() to 0.0.0.0:80 failed (98: Address already in use)
+2026/10/11 10:57:15 [emerg] 5557#5557: bind() to [::]:80 failed (98: Address already in use)
+2026/10/11 10:57:15 [notice] 5557#5557: try again to bind() after 500ms
+2026/10/11 10:57:15 [emerg] 5557#5557: bind() to 0.0.0.0:80 failed (98: Address already in use)
+2026/10/11 10:57:15 [emerg] 5557#5557: bind() to [::]:80 failed (98: Address already in use)
+2026/10/11 10:57:15 [notice] 5557#5557: try again to bind() after 500ms
+2026/10/11 10:57:15 [emerg] 5557#5557: bind() to 0.0.0.0:80 failed (98: Address already in use)
+2026/10/11 10:57:15 [emerg] 5557#5557: bind() to [::]:80 failed (98: Address already in use)
+2026/10/11 10:57:15 [notice] 5557#5557: try again to bind() after 500ms
+2026/10/11 10:57:15 [emerg] 5557#5557: still could not bind()
