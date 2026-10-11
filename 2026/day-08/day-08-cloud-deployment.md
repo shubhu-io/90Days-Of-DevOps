@@ -16,6 +16,7 @@
 | Web root | `/var/www/html` (Ubuntu) / `/usr/share/nginx/html` (Amazon Linux 2023) |
 | Page file | `index.nginx-debian.html` (Ubuntu default) |
 | Deployed by | Shubham Mane |
+| Screenshots | `screenshots/` me EC2 launch, SSH, Nginx install aur logs ke proofs hain (zyadatar Amazon Linux 2023 run se) |
 
 ## Solution (detailed)
 
@@ -28,6 +29,17 @@ Connected securely to my Ubuntu EC2 instance using SSH.
 
 PEM Downloads folder me thi, isliye pehle `cd ~/Downloads` karna pada - warna SCP/SSH `No such file` deta hai.
 
+![ec2-launch-instance](screenshots/ec2-launch-instance.png)
+![ec2-ami-selection](screenshots/ec2-ami-selection.png)
+![ec2-instance-type](screenshots/ec2-instance-type.png)
+![ec2-security-group](screenshots/ec2-security-group.png)
+![ec2-instances-list-1](screenshots/ec2-instances-list-1.png)
+![ec2-instances-list-2](screenshots/ec2-instances-list-2.png)
+![ssh-connection](screenshots/ssh-connection.png)
+![ssh-hostkey-prompt](screenshots/ssh-hostkey-prompt.png)
+![ssh-hostkey-dialog](screenshots/ssh-hostkey-dialog.png)
+![ssh-verify-os](screenshots/ssh-verify-os.png)
+
 ### Step 2 - Update packages
 ```bash
 sudo apt update -y
@@ -35,12 +47,16 @@ sudo apt update -y
 Updated package information from Ubuntu repositories.
 > Amazon Linux par: `sudo dnf update -y`
 
+![dnf-update](screenshots/dnf-update.png)
+
 ### Step 3 - Install Nginx
 ```bash
 sudo apt install nginx -y
 ```
 Installed the Nginx web server.
 > Amazon Linux par: `sudo dnf install -y nginx && sudo systemctl enable --now nginx`
+
+![nginx-install](screenshots/nginx-install.png)
 
 ### Step 4 - Verify Nginx is running
 ```bash
@@ -99,6 +115,10 @@ sudo journalctl -u nginx -n 20
 ```
 Viewed the latest 20 Nginx log entries (systemd journal se).
 > Note: native package install par logs do jagah milte hain - `journalctl -u nginx` (service log) aur `/var/log/nginx/access.log` + `error.log` (request log). Docker wale nginx me `sudo docker logs nginx-web`.
+
+![nginx-log-commands](screenshots/nginx-log-commands.png)
+![nginx-log-collection](screenshots/nginx-log-collection.png)
+![nginx-access-log](screenshots/nginx-access-log.png)
 
 ### Step 9 - Save logs to file
 ```bash
@@ -184,6 +204,9 @@ sudo docker ps
 curl -s http://localhost | grep -i "Cloud Deployment"
 ```
 
+![docker-nginx](screenshots/docker-nginx.png)
+![nginx-webpage](screenshots/nginx-webpage.png)
+
 ## Commands Used
 
 | Purpose | Command (Ubuntu - my run) | Amazon Linux 2023 |
@@ -191,13 +214,13 @@ curl -s http://localhost | grep -i "Cloud Deployment"
 | SSH | `ssh -i "miya.pem" ubuntu@ec2-...compute.amazonaws.com` | `ssh -i "miya.pem" ec2-user@<ip>` |
 | Update | `sudo apt update -y` | `sudo dnf update -y` |
 | Install Nginx | `sudo apt install nginx -y` | `sudo dnf install -y nginx` |
-| Status | `systemctl status nginx` | same |
-| Package info | `dpkg -l \| grep nginx` / `dpkg -s nginx` | `rpm -q nginx` |
+| Status | `systemctl status nginx` | `systemctl status nginx` |
+| Package info | `dpkg -l \| grep nginx` / `dpkg -s nginx` | `rpm -q nginx` / `dnf list installed \| grep nginx` |
 | Edit page | `cd /var/www/html` + `sudo nano index.nginx-debian.html` / `echo ... \| sudo tee index.nginx-debian.html` | `cd /usr/share/nginx/html` + `sudo nano index.html` + `sudo restorecon -v index.html` |
-| Services | `systemctl list-units --type=service --state=running` | same |
-| Logs | `sudo journalctl -u nginx -n 20` | same (+ `sudo tail -n 50 /var/log/nginx/*.log`) |
-| Save logs | `sudo journalctl -u nginx -n 20 > ~/nginx-logs.txt` | same |
-| Verify file | `ls -l` / `cat nginx-logs.txt` | same |
+| Services | `systemctl list-units --type=service --state=running` | `systemctl list-units --type=service --state=running` |
+| Logs | `sudo journalctl -u nginx -n 20` | `sudo journalctl -u nginx -n 20` + `sudo tail -n 50 /var/log/nginx/access.log` + `sudo tail -n 50 /var/log/nginx/error.log` |
+| Save logs | `sudo journalctl -u nginx -n 20 > ~/nginx-logs.txt` | `sudo journalctl -u nginx -n 20 > ~/nginx-logs.txt` |
+| Verify file | `ls -l` / `cat nginx-logs.txt` | `ls -l` / `cat nginx-logs.txt` |
 | Download | `scp -i "miya.pem" ubuntu@<host>:~/nginx-logs.txt .` | `scp -i "miya.pem" ec2-user@<ip>:~/nginx-logs.txt .` |
 | Docker page | `sudo tee /opt/devops-site/index.html` with `<h1>Day 08/90 - Cloud Deployment</h1>` + `<h2>Nginx Running in Docker</h2>` | same |
 | Run container | `sudo docker run -d --name nginx-web --restart unless-stopped -p 80:80 -v /opt/devops-site:/usr/share/nginx/html:ro nginx:stable-alpine` | `sudo dnf install -y docker` + same run with `:ro,z` for SELinux |
@@ -210,6 +233,7 @@ $ systemctl status nginx | grep Active
 
 $ dpkg -l | grep nginx
 ii  nginx  1.24.0-2ubuntu7  all  small, powerful, scalable web/proxy server
+# Amazon Linux par: rpm -q nginx  ->  nginx-1.30.5-1.amzn2023.x86_64
 
 $ curl -s http://localhost | grep -E '<h1>|<h2>'
   <h1>Day 08/90 - Cloud Deployment</h1>
@@ -247,9 +271,3 @@ Deliverables in this folder: `day-08-cloud-deployment.md` (this file), `nginx-lo
 - How to view service logs using `journalctl` + request logs via `/var/log/nginx/`.
 - How to transfer files securely using SCP (PEM same folder me hona chahiye).
 - Basic web server deployment and log management; docroot OS ke hisaab se badalta hai.
-
-## Screenshots
-
-![ssh-connection](screenshots/ssh-connection.png)
-![nginx-webpage](screenshots/nginx-webpage.png)
-![docker-nginx](screenshots/docker-nginx.png)
