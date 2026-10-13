@@ -1,0 +1,6 @@
+Day 10 - Linux File Operations
+Topic: touch, cat, vim, head, tail, chmod
+1. touch creates an empty file and updates timestamps.
+2. cat prints contents; > truncates and writes, >> appends.
+3. head -n 5 shows the first 5 lines, tail -n 5 the last 5.
+4. chmod changes permissions: r=4, w=2, x=1.
