@@ -63,7 +63,7 @@ printf '%s\n' '#!/bin/bash' 'echo "Hello DevOps"' > script.sh
 ```bash
 ls -l
 ```
-> **Lab note (honest):** this run was done in `~`, not `~/day10-lab`, so bare `ls -l` in the screenshot lists unrelated files (`grafana-*.deb`, `minikube-linux-amd64`, `microservices/`, …). Prefer a clean dir (`mkdir -p ~/day10-lab && cd ~/day10-lab`) and a targeted listing: `ls -l devops.txt notes.txt script.sh` — that is what the Task 3 screenshot proves.
+> **Lab note (honest):** this run was done in `~`, not `~/day10-lab`, so bare `ls -l` in the screenshot lists unrelated files (`grafana-*.deb`, `minikube-linux-amd64`, `microservices/`, …). Prefer a clean dir (`mkdir -p ~/day10-lab && cd ~/day10-lab`) and a targeted listing: `ls -l devops.txt notes.txt script.sh` — that is what the Task 4 screenshot (`chmod-executable-script-output.png`, top lines) proves.
 Expected (with umask `0022`):
 ```
 -rw-r--r-- 1 you you    0 Oct  3 10:20 devops.txt
@@ -121,7 +121,7 @@ umask                          # expect 0022
 
 Answers to the task's questions:
 - Nobody can execute any of the three files yet - there is no `x` anywhere.
-- Only you (the owner) can write to `devops.txt` and `script.sh`; your group and everyone else are read-only.
+- Only you (the owner) can write to any of the three files; your group and everyone else are read-only.
 - The leading `-` in `-rw-r--r--` means "regular file"; it is `d` for directory, `l` for symlink.
 
 Bit arithmetic: `r=4`, `w=2`, `x=1` -> `rw-` = 6, `r--` = 4, `r-x` = 5, `rwx` = 7, `rw-r--r--` = 644, `rwxrwxr-x` = 775.
@@ -209,6 +209,7 @@ chmod u+w devops.txt           # restore so later steps can use the file
 ```
 > **Lab note:** in this run's `permission-denied-tests.png` the `echo` + `python3` lines print **no** error — because `devops.txt` was still writable there (Task 4's `chmod u+w` undo was in effect). The sequence above is the corrected repro: `chmod a-w` first, then the write genuinely fails. The denied proofs actually visible in the screenshot are `./notes.txt`, `chmod -x` + `./script.sh`, and `sudo -u nobody ls project/private`.
 
+```bash
 # 2. execute a file that has no execute bit
 ./notes.txt
 # bash: ./notes.txt: Permission denied
@@ -307,7 +308,7 @@ umask
 # modify
 chmod +x script.sh ; chmod -x script.sh ; chmod a-w devops.txt ; chmod u+w devops.txt
 chmod 640 notes.txt ; chmod 755 project
-chmod u+x / g+x / o-x / a+r file
+chmod u+x file ; chmod g+x file ; chmod o-x file ; chmod a+r file
 
 # test
 ./script.sh ; ./notes.txt ; bash notes.txt
@@ -333,7 +334,7 @@ chmod a-w devops.txt && echo x >> devops.txt ; python3 -c "open('devops.txt','a'
 - Removing write from *all* (`chmod a-w`) locks out the owner too; recovery needs `chmod u+w` or `sudo`
 
 ## Troubleshooting / Gotchas
-- **`Permission denied` but `ls -l` looks right.** Check the parent directories - `/home/tokyo/Documents` needs `x` on `Documents`. Diagnose the whole path with `namei -l /path/to/file`.
+- **`Permission denied` but `ls -l` looks right.** Check the parent directories - e.g. `~/Documents` needs `x` for your user. Diagnose the whole path with `namei -l /path/to/file`.
 - **Scripts created on Windows fail** with `bash: ./script.sh: /bin/bash^M: bad interpreter`. Fix: `sed -i 's/\r$//' script.sh` (CRLF line endings).
 - **`chmod` seems to have no effect.** You are on a mounted filesystem that ignores Linux modes - WSL2's `/mnt/c`, NTFS/exFAT, some NFS/CIFS mounts. Copy the file into `~` (ext4) and it behaves normally.
 - **Root can read everything, so testing as root proves nothing.** Use `sudo -u nobody` or a second real user to test permissions honestly.
