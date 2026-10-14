@@ -1,0 +1,23 @@
+# Day 11 - ownership lab configuration
+# Owned by professor:heist-team after:
+#   sudo chown professor:heist-team project-config.yaml
+
+app:
+  name: heist-planner
+  environment: lab
+  log_dir: ./app-logs
+  workers: 2
+
+paths:
+  vault: heist-project/vault
+  plans: heist-project/plans
+
+ownership:
+  app_logs:
+    owner: berlin
+    group: heist-team
+    mode: "755"
+  heist_project:
+    owner: professor
+    group: planners
+    mode: "755"

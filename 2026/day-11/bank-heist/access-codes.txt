@@ -1,0 +1,10 @@
+LAB PLACEHOLDER - fake codes for the Day 11 ownership exercise.
+No real credentials here.
+
+gate-1: 0000
+vault: 1111
+
+Ownership target:
+  sudo chown tokyo:vault-team bank-heist/access-codes.txt
+Verify:
+  ls -l bank-heist/access-codes.txt

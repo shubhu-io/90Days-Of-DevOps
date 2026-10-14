@@ -1,0 +1,14 @@
+# Day 11 - Heist Team Notes
+
+Owner: unassigned (changed to berlin in the lab)
+Group: heist-team
+
+## Agenda
+- Roles: tokyo (vault), berlin (tech), nairobi (escape), professor (planner)
+- Shared group for this file: heist-team
+- All placeholder content - this is a training exercise, not a real operation.
+
+## Ownership rules for this file
+- Group set with: sudo chgrp heist-team team-notes.txt
+- Equivalent:          sudo chown :heist-team team-notes.txt
+- chgrp never changes the owner.

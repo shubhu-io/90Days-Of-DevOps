@@ -149,7 +149,7 @@ sudo chown :groupname filename
 Create `day-11-file-ownership.md`:
 
 ```markdown
-# Day 11 Challenge
+# Day 11 - File Ownership Challenge (chown & chgrp)
 
 ## Files & Directories Created
 [list all files/directories]
@@ -163,7 +163,7 @@ Example:
 ## Commands Used
 [your commands here]
 
-## What I Learned
+## Key Learnings
 [3 key points about file ownership]
 ```
 

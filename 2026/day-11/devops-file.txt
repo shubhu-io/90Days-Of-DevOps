@@ -1,0 +1,12 @@
+Day 11 - chown & chgrp lab file.
+
+This file is used to demonstrate owner changes only:
+  youruser:yourgroup  ->  tokyo:yourgroup  ->  berlin:yourgroup
+
+Note that the group column never moves when you run:
+  sudo chown tokyo devops-file.txt
+
+Answer to the task's question - owner vs group:
+  The owner is the single account that owns the file. The group is a shared
+  identity; every user who is a member of that group gets the group's
+  permission bits. A file has exactly one UID and one GID.

@@ -1,0 +1,11 @@
+LAB PLACEHOLDER - roleplay notes only.
+Day 11 ownership exercise, not a real plan.
+
+1. Disable the alarm loop.
+2. Take the north alley.
+3. Split at the river tunnel.
+
+Ownership target:
+  sudo chown nairobi:vault-team bank-heist/escape-plan.txt
+Verify:
+  ls -l bank-heist/escape-plan.txt

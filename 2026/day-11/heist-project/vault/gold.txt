@@ -1,0 +1,7 @@
+LAB PLACEHOLDER - no real value here.
+Vault token count: 1 (unused).
+Used to demonstrate recursive ownership:
+  sudo chown -R professor:planners heist-project/
+
+Final ownership expected: professor:planners
+Check with: ls -l heist-project/vault/gold.txt

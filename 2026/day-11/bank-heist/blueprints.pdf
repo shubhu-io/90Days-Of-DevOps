@@ -1,0 +1,11 @@
+Placeholder for the lab artefact.
+Replace with a real PDF of your own diagrams before submitting.
+
+Ownership target:
+  sudo chown berlin:tech-team bank-heist/blueprints.pdf
+Verify:
+  ls -l bank-heist/blueprints.pdf
+
+Note: tokyo is NOT a member of tech-team, so:
+  sudo -u tokyo sh -c 'echo x >> bank-heist/blueprints.pdf'
+fails with: bash: bank-heist/blueprints.pdf: Permission denied
