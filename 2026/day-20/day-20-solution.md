@@ -4,7 +4,7 @@
 
 Day 20 breaks the log-analysis workflow into small scripts, one per task, so each
 command can be tested on its own before being combined into the full report
-generator. The scripts live beside this file and use `grep`, `awk`,
+generator. The scripts live in `scripts/` and use `grep`, `awk`,
 `sort`, `uniq`, and `sed` against the 200-line `sample_log.log` fixture.
 The numbers below come from the current fixture; regenerating it with
 `sample_logs_generator.sh` creates a new random log with different counts.
@@ -20,7 +20,7 @@ keep it quoted.
 
 ```bash
 cd "/mnt/d/daily dev/trainwithshubham/90/90Days-Of-DevOps/2026/day-20"
-mkdir -p screenshots
+mkdir -p scripts screenshots
 ```
 
 If you are in Windows PowerShell instead of WSL, the `/mnt/d/...` path will not
@@ -29,7 +29,7 @@ work. Open Ubuntu from the Start menu, or run the scripts through `bash`:
 ```powershell
 cd "D:\daily dev\trainwithshubham\90\90Days-Of-DevOps\2026\day-20"
 bash ./sample_logs_generator.sh sample_log.log 200
-bash ./input_valid.sh sample_log.log
+bash ./scripts/input_valid.sh sample_log.log
 ```
 
 Check that the provided generator and challenge file are present:
@@ -38,7 +38,7 @@ Check that the provided generator and challenge file are present:
 ls README.md sample_logs_generator.sh
 ```
 
-![Earlier scripts folder layout](screenshots/10-scripts-folder.png)
+![Scripts folder](screenshots/10-scripts-folder.png)
 
 If `nano` is missing, install it once:
 
@@ -68,7 +68,7 @@ Log file created at: sample_log.log with 200 lines.
 ### 2. Create and run the input validation script
 
 ```bash
-nano input_valid.sh
+nano scripts/input_valid.sh
 ```
 
 Paste:
@@ -94,8 +94,8 @@ echo "Log file found: $LOG_FILE"
 Execute:
 
 ```bash
-chmod +x input_valid.sh
-./input_valid.sh sample_log.log
+chmod +x scripts/input_valid.sh
+./scripts/input_valid.sh sample_log.log
 ```
 
 ```text
@@ -107,7 +107,7 @@ Log file found: sample_log.log
 ### 3. Create and run the error count script
 
 ```bash
-nano error_count.sh
+nano scripts/error_count.sh
 ```
 
 Paste:
@@ -135,8 +135,8 @@ echo "Total Error Count: $ERROR_COUNT"
 Execute:
 
 ```bash
-chmod +x error_count.sh
-./error_count.sh sample_log.log
+chmod +x scripts/error_count.sh
+./scripts/error_count.sh sample_log.log
 ```
 
 ```text
@@ -150,7 +150,7 @@ Total Error Count: 50
 ### 4. Create and run the critical events script
 
 ```bash
-nano critical.sh
+nano scripts/critical.sh
 ```
 
 Paste:
@@ -184,8 +184,8 @@ fi
 Execute:
 
 ```bash
-chmod +x critical.sh
-./critical.sh sample_log.log
+chmod +x scripts/critical.sh
+./scripts/critical.sh sample_log.log
 ```
 
 ![Create critical.sh](screenshots/04-create-critical.png)
@@ -195,7 +195,7 @@ chmod +x critical.sh
 ### 5. Create and run the top errors script
 
 ```bash
-nano top_error.sh
+nano scripts/top_error.sh
 ```
 
 Paste:
@@ -232,8 +232,8 @@ fi
 Execute:
 
 ```bash
-chmod +x top_error.sh
-./top_error.sh sample_log.log
+chmod +x scripts/top_error.sh
+./scripts/top_error.sh sample_log.log
 ```
 
 ![Create top_error.sh](screenshots/05-create-top-error.png)
@@ -243,7 +243,7 @@ chmod +x top_error.sh
 ### 6. Create and run the full report script
 
 ```bash
-nano log_analyzer_report.sh
+nano scripts/log_analyzer_report.sh
 ```
 
 Paste:
@@ -327,8 +327,8 @@ echo "Log analysis completed."
 Execute from the day-20 root so the report is written beside the scripts:
 
 ```bash
-chmod +x log_analyzer_report.sh
-./log_analyzer_report.sh sample_log.log
+chmod +x scripts/log_analyzer_report.sh
+./scripts/log_analyzer_report.sh sample_log.log
 ```
 
 ```text
@@ -350,17 +350,17 @@ Use a copy so the fixture stays in place.
 
 ```bash
 cp sample_log.log sample_copy.log
-./log_analyzer_report.sh sample_copy.log --archive
+./scripts/log_analyzer_report.sh sample_copy.log --archive
 ```
 
 ## Task 1: Input and Validation
 
-[`input_valid.sh`](input_valid.sh) accepts one log path and fails
+[`scripts/input_valid.sh`](scripts/input_valid.sh) accepts one log path and fails
 fast when the argument is missing or the file does not exist.
 
 ```bash
-chmod +x input_valid.sh
-./input_valid.sh sample_log.log
+chmod +x scripts/input_valid.sh
+./scripts/input_valid.sh sample_log.log
 ```
 
 ```text
@@ -370,12 +370,12 @@ Log file found: sample_log.log
 Failure paths:
 
 ```bash
-$ ./input_valid.sh
-Usage: ./input_valid.sh <log_file>
+$ ./scripts/input_valid.sh
+Usage: ./scripts/input_valid.sh <log_file>
 $ echo $?
 1
 
-$ ./input_valid.sh missing.log
+$ ./scripts/input_valid.sh missing.log
 Error: file does not exist: missing.log
 $ echo $?
 1
@@ -384,12 +384,12 @@ $ echo $?
 
 ## Task 2: Error Count
 
-[`error_count.sh`](error_count.sh) counts lines matching either
+[`scripts/error_count.sh`](scripts/error_count.sh) counts lines matching either
 `ERROR` or `Failed`.
 
 ```bash
-chmod +x error_count.sh
-./error_count.sh sample_log.log
+chmod +x scripts/error_count.sh
+./scripts/error_count.sh sample_log.log
 ```
 
 ```text
@@ -402,12 +402,12 @@ alive when a clean log has zero matches.
 
 ## Task 3: Critical Events
 
-[`critical.sh`](critical.sh) prints every `CRITICAL` line with its
+[`scripts/critical.sh`](scripts/critical.sh) prints every `CRITICAL` line with its
 line number in the required `Line N:` format.
 
 ```bash
-chmod +x critical.sh
-./critical.sh sample_log.log
+chmod +x scripts/critical.sh
+./scripts/critical.sh sample_log.log
 ```
 
 ```text
@@ -425,12 +425,12 @@ The fixture contains 35 critical events in total.
 
 ## Task 4: Top Error Messages
 
-[`top_error.sh`](top_error.sh) normalizes each `ERROR` line,
+[`scripts/top_error.sh`](scripts/top_error.sh) normalizes each `ERROR` line,
 counts duplicates, and keeps the top five.
 
 ```bash
-chmod +x top_error.sh
-./top_error.sh sample_log.log
+chmod +x scripts/top_error.sh
+./scripts/top_error.sh sample_log.log
 ```
 
 ```text
@@ -449,12 +449,12 @@ The pipeline is always `sort | uniq -c | sort -rn | head -5`.
 
 ## Task 5: Summary Report
 
-[`log_analyzer_report.sh`](log_analyzer_report.sh) runs the full
+[`scripts/log_analyzer_report.sh`](scripts/log_analyzer_report.sh) runs the full
 analysis and writes a dated report.
 
 ```bash
-chmod +x log_analyzer_report.sh
-./log_analyzer_report.sh sample_log.log
+chmod +x scripts/log_analyzer_report.sh
+./scripts/log_analyzer_report.sh sample_log.log
 ```
 
 ```text
@@ -499,7 +499,7 @@ Pass `--archive` to move the analyzed log into `archive/` after the report is
 written.
 
 ```bash
-./log_analyzer_report.sh sample.log --archive
+./scripts/log_analyzer_report.sh sample.log --archive
 ```
 
 ```text
@@ -516,26 +516,26 @@ suffix instead of overwriting an earlier log.
 
 ```bash
 cd 2026/day-20
-sed -i 's/\r$//' *.sh
+sed -i 's/\r$//' sample_logs_generator.sh scripts/*.sh
 
 chmod +x sample_logs_generator.sh
 ./sample_logs_generator.sh sample_log.log 200
 
-chmod +x input_valid.sh
-./input_valid.sh sample_log.log
-chmod +x error_count.sh
-./error_count.sh sample_log.log
-chmod +x critical.sh
-./critical.sh sample_log.log
-chmod +x top_error.sh
-./top_error.sh sample_log.log
-chmod +x log_analyzer_report.sh
-./log_analyzer_report.sh sample_log.log
+chmod +x scripts/input_valid.sh
+./scripts/input_valid.sh sample_log.log
+chmod +x scripts/error_count.sh
+./scripts/error_count.sh sample_log.log
+chmod +x scripts/critical.sh
+./scripts/critical.sh sample_log.log
+chmod +x scripts/top_error.sh
+./scripts/top_error.sh sample_log.log
+chmod +x scripts/log_analyzer_report.sh
+./scripts/log_analyzer_report.sh sample_log.log
 ```
 
 All scripts run from the `day-20` root. The report script writes the dated report
 beside them, matching the link above.
-`log_analyzer_report.sh` writes its report to the current directory and only
+`scripts/log_analyzer_report.sh` writes its report to the current directory and only
 archives the log when `--archive` is supplied.
 
 ## What I Learned
