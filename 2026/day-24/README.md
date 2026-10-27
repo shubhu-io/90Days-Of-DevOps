@@ -15,11 +15,11 @@ You know how to branch and push to GitHub. Now it's time to learn how branches c
 ## Challenge Tasks
 
 ### Task 1: Git Merge — Hands-On
-1. Create a new branch `feature-login` from `main`, add a couple of commits to it
-2. Switch back to `main` and merge `feature-login` into `main`
+1. Create a new branch `feature-login` from `master`, add a couple of commits to it
+2. Switch back to `master` and merge `feature-login` into `master`
 3. Observe the merge — did Git do a **fast-forward** merge or a **merge commit**?
-4. Now create another branch `feature-signup`, add commits to it — but also add a commit to `main` before merging
-5. Merge `feature-signup` into `main` — what happens this time?
+4. Now create another branch `feature-signup`, add commits to it — but also add a commit to `master` before merging
+5. Merge `feature-signup` into `master` — what happens this time?
 6. Answer in your notes:
    - What is a fast-forward merge?
    - When does Git create a merge commit instead?
@@ -28,9 +28,9 @@ You know how to branch and push to GitHub. Now it's time to learn how branches c
 ---
 
 ### Task 2: Git Rebase — Hands-On
-1. Create a branch `feature-dashboard` from `main`, add 2-3 commits
-2. While on `main`, add a new commit (so `main` moves ahead)
-3. Switch to `feature-dashboard` and rebase it onto `main`
+1. Create a branch `feature-dashboard` from `master`, add 2-3 commits
+2. While on `master`, add a new commit (so `master` moves ahead)
+3. Switch to `feature-dashboard` and rebase it onto `master`
 4. Observe your `git log --oneline --graph --all` — how does the history look compared to a merge?
 5. Answer in your notes:
    - What does rebase actually do to your commits?
@@ -42,10 +42,10 @@ You know how to branch and push to GitHub. Now it's time to learn how branches c
 
 ### Task 3: Squash Commit vs Merge Commit
 1. Create a branch `feature-profile`, add 4-5 small commits (typo fix, formatting, etc.)
-2. Merge it into `main` using `--squash` — what happens?
-3. Check `git log` — how many commits were added to `main`?
+2. Merge it into `master` using `--squash` — what happens?
+3. Check `git log` — how many commits were added to `master`?
 4. Now create another branch `feature-settings`, add a few commits
-5. Merge it into `main` **without** `--squash` (regular merge) — compare the history
+5. Merge it into `master` **without** `--squash` (regular merge) — compare the history
 6. Answer in your notes:
    - What does squash merging do?
    - When would you use squash merge vs regular merge?
@@ -69,8 +69,8 @@ You know how to branch and push to GitHub. Now it's time to learn how branches c
 
 ### Task 5: Cherry Picking
 1. Create a branch `feature-hotfix`, make 3 commits with different changes
-2. Switch to `main`
-3. Cherry-pick **only the second commit** from `feature-hotfix` onto `main`
+2. Switch to `master`
+3. Cherry-pick **only the second commit** from `feature-hotfix` onto `master`
 4. Verify with `git log` that only that one commit was applied
 5. Answer in your notes:
    - What does cherry-pick do?
