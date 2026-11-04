@@ -11,6 +11,9 @@ Containers are ephemeral — they lose data when removed. And by default, contai
 - A markdown file: `day-32-volumes-networking.md`
 - Screenshots of your experiments
 
+### Environment
+Amazon Linux 2023 (EC2) + Docker installed from `amazon-linux-extras`; images pulled from Docker Hub. Browser access via `http://<ec2-public-ip>:8080`.
+
 ---
 
 ## Challenge Tasks

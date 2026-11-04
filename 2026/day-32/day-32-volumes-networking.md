@@ -13,15 +13,32 @@
 
 | OS / Shell / Tool | Install / Version command |
 |---|---|
-| OS: Windows 10/11 + WSL2 (Ubuntu) or Ubuntu VM, Docker Desktop | `docker --version` → [TODO - run on your machine], e.g. `Docker version 27.x` |
-| Shell: bash (WSL2/Ubuntu) | `bash --version` |
-| Images used | `postgres:16` (or `mysql:8`), `nginx:alpine`, `alpine` (ping/busybox) |
+| OS: Amazon Linux 2023 (EC2) | `cat /etc/os-release` |
+| Shell: bash | `bash --version` |
+| Docker | `sudo amazon-linux-extras install docker` then `sudo service docker start` and `sudo usermod -aG docker $USER` |
+| Images used | `postgres:16` (or `mysql:8`), `nginx:alpine`, `alpine` — pulled from Docker Hub |
+| Registry | Docker Hub (`docker login`, `docker pull <image>`) |
 | Network tools inside containers | `ping`, `getent`, `nc` (busybox/alpine include ping) |
-| Browser (Task 3) | `http://localhost:8080` |
+| Browser (Task 3) | `http://<ec2-public-ip>:8080` |
+
+## Setup on Amazon Linux
 
 ```bash
+# Install Docker
+sudo amazon-linux-extras install docker
+sudo service docker start
+sudo usermod -aG docker $USER
+newgrp docker
+
+# Login to Docker Hub
+docker login
+
+# Pull images used in this lab from Docker Hub
+docker pull postgres:16
+docker pull nginx:alpine
+docker pull alpine
+
 docker --version
-docker pull postgres:16 nginx:alpine alpine
 docker images
 ```
 
