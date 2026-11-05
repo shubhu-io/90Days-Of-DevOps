@@ -11,6 +11,9 @@ Yesterday you manually created networks and volumes and ran containers one by on
 - A markdown file: `day-33-compose.md`
 - All `docker-compose.yml` files you create
 
+### Environment
+Amazon Linux 2023 (EC2) with Docker + Compose v2 installed; images pulled from Docker Hub. Browser access via `http://<ec2-public-ip>:8080` and `http://<ec2-public-ip>:8081` (open both ports in the EC2 security group).
+
 ---
 
 ## Challenge Tasks

@@ -12,17 +12,39 @@
 
 | OS / Shell / Tool | Install / Version command |
 |---|---|
-| OS: Windows 10/11 + WSL2 or Ubuntu VM, Docker Desktop | `docker --version` → [TODO - run on your machine] |
-| Docker Compose v2 plugin (bundled with Desktop) | `docker compose version` → [TODO - run on your machine], e.g. `v2.27.0` |
+| OS: Amazon Linux 2023 (EC2) | `cat /etc/os-release` |
 | Shell: bash | `bash --version` |
-| Browser | `http://localhost:8080` (nginx), `http://localhost:8081` (wordpress) |
-| Images pulled by compose | `nginx:alpine`, `mysql:8`, `wordpress:latest` |
+| Docker Engine (installed on EC2) | `docker --version` → e.g. `Docker version 29.x` |
+| Docker Compose v2 plugin | `docker compose version` → e.g. `v2.27.0` |
+| Browser | `http://<ec2-public-ip>:8080` (nginx), `http://<ec2-public-ip>:8081` (wordpress) |
+| Images pulled by compose | `nginx:alpine`, `mysql:8`, `wordpress:latest` — from Docker Hub |
+| Registry | Docker Hub (`docker login`, `docker pull <image>`) |
+
+## Setup on Amazon Linux
 
 ```bash
+# Install Docker
+sudo dnf install -y docker
+sudo systemctl enable --now docker
+sudo usermod -aG docker $USER
+newgrp docker
+
+# Install the Compose v2 plugin
+sudo mkdir -p /usr/local/lib/docker/cli-plugins
+sudo curl -SL https://github.com/docker/compose/releases/latest/download/docker-compose-linux-x86_64 \
+  -o /usr/local/lib/docker/cli-plugins/docker-compose
+sudo chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
+
+# Login to Docker Hub (all images in this lab are pulled from it)
+docker login
+
+# Allow inbound TCP 8080 and 8081 in the EC2 security group, then verify
 docker --version
 docker compose version
 docker compose --help | head -20
 ```
+
+On Amazon Linux 2 use `sudo amazon-linux-extras install docker` instead of `dnf`.
 
 ## Solution
 
@@ -41,7 +63,7 @@ Docker Compose version v2.27.0   # [TODO - run on your machine]
 
 ![compose version](screenshots/01-compose-version.png)
 
-Notes: Compose v2 is `docker compose` (space, plugin) not the old `docker-compose` (hyphen, Python). No `version:` top key needed — Compose v2 ignores it with a warning. Docker Desktop ships the plugin; on Ubuntu install `docker-compose-plugin` via apt.
+Notes: Compose v2 is `docker compose` (space, plugin) not the old `docker-compose` (hyphen, Python). No `version:` top key needed — Compose v2 ignores it with a warning. On Amazon Linux install the Compose v2 plugin binary as shown above (or `docker-compose-plugin` if your repo provides it).
 
 **WHY it matters:** every later day (`flask-stack`, `notes-app`, CI pipelines) assumes `docker compose` works. Verifying now avoids debugging YAML that was actually a missing plugin.
 
@@ -64,7 +86,7 @@ cd compose-basics
 docker compose config        # validate + render (cheap pre-flight)
 docker compose up            # foreground; Ctrl+C stops
 curl http://localhost:8080
-# open http://localhost:8080 in browser — Nginx welcome page
+# from your laptop: http://<ec2-public-ip>:8080 — Nginx welcome page
 docker compose down
 docker compose ps            # nothing running
 ```
@@ -135,10 +157,10 @@ cd wordpress
 docker compose up -d
 docker compose ps
 docker compose logs -f db | grep -i "ready for connections"
-# open http://localhost:8081 — complete the WordPress setup wizard
+# from your laptop: http://<ec2-public-ip>:8081 — complete the WordPress setup wizard
 docker compose down
 docker compose up -d
-# open http://localhost:8081 again — configured site loads, NOT the wizard
+# open http://<ec2-public-ip>:8081 again — configured site loads, NOT the wizard
 docker volume ls | grep db_data
 ```
 
@@ -255,6 +277,7 @@ nano .gitignore
 ## Commands Used
 
 ```bash
+docker login
 docker --version
 docker compose version
 cd compose-basics && docker compose config
@@ -283,8 +306,8 @@ docker volume ls
 
 - `docker compose version` prints `v2.x.x` — run it and record the version
 - `docker compose config` in `compose-basics/` renders without errors
-- Nginx welcome page loads at `http://localhost:8080`; after `down`, `docker compose ps` is empty
-- WordPress wizard completes at `http://localhost:8081`; after `down` + `up` the configured site (not wizard) loads
+- Nginx welcome page loads at `http://<ec2-public-ip>:8080` (security group allows 8080); after `down`, `docker compose ps` is empty
+- WordPress wizard completes at `http://<ec2-public-ip>:8081`; after `down` + `up` the configured site (not wizard) loads
 - `docker volume ls` shows `wordpress_db_data` — run and confirm
 - `docker compose ps`, `logs -f`, `logs -f wordpress`, `stop`, `start`, `down`, `up -d --build` each run without error
 - `docker compose config` shows `.env` values substituted (port `8081`, passwords)
@@ -311,7 +334,7 @@ docker volume ls
 - `.env` edits ignored — containers already created with old values. Cause: Compose reads `.env` at `up` time only. Fix: `docker compose up -d` again (or `--force-recreate`)
 - `WORDPRESS_DB_HOST` typo (`mysql` vs `db`) — DNS failure. Cause: must match the service key exactly. Fix: `WORDPRESS_DB_HOST: db`
 - Old `docker-compose` (hyphen) `command not found` — v1 not installed. Cause: following pre-2023 guides. Fix: use `docker compose` (space) — the v2 plugin
-- MySQL container exits immediately — bad permissions/env on Windows bind paths. Cause: mounting Windows paths into MySQL datadir. Fix: use a named volume (as in this stack), not a bind mount, for DB data
+- MySQL container exits immediately — bad permissions/SELinux on a bind-mounted datadir. Cause: mounting a host directory (or Windows path under WSL) into `/var/lib/mysql`. Fix: use a named volume (as in this stack), not a bind mount, for DB data
 
 ## Screenshots
 
@@ -321,7 +344,7 @@ Screenshots are embedded in the task sections above and saved in `2026/day-33/sc
 |---|---|---|
 | `01-compose-version.png` | `docker --version` + `docker compose version` + help output | Task 1 |
 | `02-nginx-compose-up.png` | `docker compose up -d`, `ps`, `curl` + browser Nginx welcome at `:8080` | Task 2 |
-| `03-wordpress-wizard.png` | WordPress setup wizard at `http://localhost:8081` | Task 3 |
+| `03-wordpress-wizard.png` | WordPress setup wizard at `http://<ec2-public-ip>:8081` | Task 3 |
 | `04-wordpress-persist.png` | configured site after `down` + `up` (no wizard) | Task 3 |
 | `05-compose-ps-logs.png` | `docker compose ps` + `logs -f wordpress` output | Task 4 |
 | `06-env-config.png` | `docker compose config` substitutions + container env vars | Task 5 |
