@@ -1,0 +1,108 @@
+services:
+
+  # ==========================================
+  # 1. FLASK WEB APPLICATION
+  # ==========================================
+  web:
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+
+    image: mrteddyb/flask-stack-web:1.0.0
+
+    ports:
+      - "5000:5000"
+
+    environment:
+      DB_HOST: db
+      REDIS_HOST: cache
+      POSTGRES_DB: appdb
+      POSTGRES_USER: appuser
+      POSTGRES_PASSWORD: apppass
+
+    # Wait until PostgreSQL and Redis are healthy
+    depends_on:
+      db:
+        condition: service_healthy
+      cache:
+        condition: service_healthy
+
+    networks:
+      - frontend
+      - backend
+
+    restart: unless-stopped
+
+    labels:
+      com.example.project: "flask-stack"
+      com.example.role: "web"
+
+  # ==========================================
+  # 2. POSTGRESQL DATABASE
+  # ==========================================
+  db:
+    image: postgres:16
+
+    environment:
+      POSTGRES_DB: appdb
+      POSTGRES_USER: appuser
+      POSTGRES_PASSWORD: apppass
+
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+    networks:
+      - backend
+
+    # PostgreSQL readiness check
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U appuser -d appdb"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 20s
+
+    restart: always
+
+    labels:
+      com.example.project: "flask-stack"
+      com.example.role: "database"
+
+  # ==========================================
+  # 3. REDIS CACHE
+  # ==========================================
+  cache:
+    image: redis:7-alpine
+
+    networks:
+      - backend
+
+    # Redis readiness check
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+
+    restart: unless-stopped
+
+    labels:
+      com.example.project: "flask-stack"
+      com.example.role: "cache"
+
+# ==========================================
+# NETWORK CONFIGURATION
+# ==========================================
+networks:
+  frontend:
+    driver: bridge
+
+  backend:
+    driver: bridge
+
+# ==========================================
+# PERSISTENT DATABASE STORAGE
+# ==========================================
+volumes:
+  db_data:
