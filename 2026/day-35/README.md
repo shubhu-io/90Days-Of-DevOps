@@ -12,6 +12,9 @@ Multi-stage builds are how real teams ship small, secure images. Docker Hub is h
 - Dockerfiles demonstrating multi-stage builds
 - An image pushed to your Docker Hub account
 
+### Environment
+Work through this day on an **Amazon Linux 2023 EC2 instance**: build both Dockerfiles on the instance and push the multi-stage image to **Docker Hub** (`mrteddyb/go-hello`). Run the container at `http://<ec2-public-ip>:8080` (open port 8080 in the EC2 security group) and verify the same image with a fresh `docker pull`.
+
 ---
 
 ## Challenge Tasks
