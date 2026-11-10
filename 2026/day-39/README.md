@@ -16,7 +16,7 @@ Today is a research and diagram day — no pipelines yet. Get the concepts right
 ## Challenge Tasks
 
 ### Task 1: The Problem
-Think about a team of 5 developers all pushing code to the same repo, manually deploying to production.
+Think about a team of 5 developers all pushing code to the same repo manually deploying to production.
 
 Write in your notes:
 1. What can go wrong?
