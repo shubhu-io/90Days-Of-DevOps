@@ -25,7 +25,7 @@ Create `person.yaml` that describes yourself with:
 - `experience_years`
 - `learning` (a boolean)
 
-**Verify:** Run `cat person.yaml` — does it look clean? No tabs?
+**Verify:** Run `nano person.yaml` — does it look clean? No tabs?
 
 ---
 

@@ -1,0 +1,25 @@
+---
+server:
+  name: web-prod-01
+  ip: 10.0.1.25
+  port: 8080
+
+database:
+  host: db-prod-01
+  name: appdb
+  credentials:
+    user: appuser
+    password: change-me
+
+# | keeps every newline, so this is a real script.
+startup_script: |
+  #!/bin/bash
+  apt-get update
+  apt-get install -y nginx
+  systemctl enable --now nginx
+
+# > folds lines into one line, so this is prose.
+startup_script_folded: >
+  Install nginx from apt, keep it enabled at boot,
+  and start it right away so the app server responds
+  as soon as the machine finishes booting.

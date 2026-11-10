@@ -1,0 +1,15 @@
+---
+# Replace these placeholder values with your own details.
+name: Your Name
+role: DevOps Engineer (in training)
+experience_years: 1
+learning: true
+
+tools:
+  - docker
+  - kubernetes
+  - terraform
+  - github-actions
+  - prometheus
+
+hobbies: [cricket, reading, chess, music]
