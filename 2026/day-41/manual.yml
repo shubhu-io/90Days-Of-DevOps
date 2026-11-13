@@ -1,0 +1,20 @@
+name: Manual Run
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+
+jobs:
+  manual:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Print input
+        run: 'echo "Environment selected: ${{ inputs.environment }}"'
