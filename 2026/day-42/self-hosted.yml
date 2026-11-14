@@ -1,0 +1,17 @@
+name: Self-Hosted Job
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+jobs:
+  self-hosted:
+    runs-on: [self-hosted, my-linux-runner]
+    steps:
+      - name: Print hostname
+        run: hostname
+      - name: Print working directory
+        run: pwd
+      - name: Create marker file
+        run: 'echo "created by self-hosted runner on $(date)" > ~/gha-selfhosted-marker.txt && cat ~/gha-selfhosted-marker.txt && ls -l ~/gha-selfhosted-marker.txt'
