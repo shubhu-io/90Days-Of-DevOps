@@ -1,0 +1,29 @@
+name: Smart Pipeline
+
+on:
+  push:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Linting..."
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Testing..."
+
+  summary:
+    needs: [lint, test]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Branch type
+        run: |
+          if [ "${{ github.ref }}" == "refs/heads/master" ]; then
+            echo "This is a push to master"
+          else
+            echo "This is a push to a feature branch: ${{ github.ref_name }}"
+          fi
+      - name: Commit message
+        run: 'echo "Commit message: ${{ github.event.head_commit.message }}"'

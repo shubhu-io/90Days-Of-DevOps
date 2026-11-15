@@ -1,0 +1,21 @@
+name: Job Outputs
+
+on:
+  push:
+
+jobs:
+  set-date:
+    runs-on: ubuntu-latest
+    outputs:
+      date: ${{ steps.date.outputs.date }}
+    steps:
+      - name: Set output
+        id: date
+        run: echo "date=$(date)" >> $GITHUB_OUTPUT
+
+  read-date:
+    needs: set-date
+    runs-on: ubuntu-latest
+    steps:
+      - name: Read output from previous job
+        run: 'echo "Date from job 1: ${{ needs.set-date.outputs.date }}"'

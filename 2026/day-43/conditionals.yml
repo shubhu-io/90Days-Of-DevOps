@@ -1,0 +1,29 @@
+name: Conditionals
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+jobs:
+  master-only-step:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Always runs
+        run: echo "Hello from ${{ github.ref }}"
+      - name: Only on master branch
+        if: github.ref == 'refs/heads/master'
+        run: echo "This is the master branch"
+      - name: May fail
+        id: flaky
+        continue-on-error: true
+        run: exit 1
+      - name: Only runs if previous step failed
+        if: steps.flaky.outcome == 'failure'
+        run: echo "The previous step failed, handling it"
+
+  push-only-job:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "This job only runs on push, not on pull requests"
