@@ -1,0 +1,28 @@
+name: Artifacts Between Jobs
+
+on:
+  workflow_dispatch:
+
+jobs:
+  producer:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate file
+        run: echo "hello from job 1" > data.txt
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: my-data
+          path: data.txt
+
+  consumer:
+    needs: producer
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: my-data
+          path: .
+      - name: Use file
+        run: cat data.txt

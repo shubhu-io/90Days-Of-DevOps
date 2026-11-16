@@ -1,0 +1,15 @@
+name: Run Tests
+
+on:
+  push:
+    branches: [master]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Make script executable and run
+        run: |
+          chmod +x github.sh
+          ./github.sh
