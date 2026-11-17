@@ -8,7 +8,7 @@ Recap of every challenge task from `README.md`:
 - **Task 2 — Build the Docker Image in CI:** Create `.github/workflows/docker-publish.yml` triggered on push to `master` (the task text says `main`); checkout + build + tag; verify build logs succeed.
 - **Task 3 — Push to Docker Hub:** Login with secrets, tag `username/repo:latest` + `username/repo:sha-<short-hash>`, push both; verify on Docker Hub.
 - **Task 4 — Only Push on Main:** Gate push steps so feature-branch/PR pushes build but do NOT push; test with a feature-branch push.
-- **Task 5 — Add a Status Badge:** Get the badge URL from the Actions tab, add to repo `README.md`, push, confirm green badge.
+- **Task 5 — Add a Status Badge:** Get the badge URL from the Actions tab, add to repo `README.md`, push, confirm the badge mirrors the latest run (green once publish succeeds).
 - **Task 6 — Pull and Run It:** Locally `docker pull` + `docker run` the published image; write the full `git push` → running-container journey.
 - **Documentation deliverable:** `day-45-docker-cicd.md` with complete YAML, Docker Hub link, pipeline screenshot, and the Task 6 journey.
 
@@ -336,7 +336,7 @@ docker images mrteddyb/myapp
   ```bash
   gh secret set DOCKER_USERNAME -R shubhu-io/github-actions-practice --body "mrteddyb"
   gh secret set DOCKER_TOKEN -R shubhu-io/github-actions-practice --body "<new-access-token>"
-  gh workflow run docker-publish.yml -R shubhu-io/github-actions-practice --ref master
+  gh run rerun 42465725283 -R shubhu-io/github-actions-practice   # or push any commit to master
   gh run watch -R shubhu-io/github-actions-practice
   ```
   Success looks like: login ✅ → push ✅ → tags `latest` and `sha-xxxxxxx` on
