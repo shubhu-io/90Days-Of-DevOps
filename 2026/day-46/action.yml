@@ -1,0 +1,39 @@
+name: 'Setup and Greet'
+description: 'Prints a greeting, date, OS and exposes a greeted output'
+
+inputs:
+  name:
+    description: 'Name to greet'
+    required: true
+  language:
+    description: 'Greeting language code'
+    required: false
+    default: 'en'
+
+outputs:
+  greeted:
+    description: 'Always true once the action ran'
+    value: ${{ steps.set-output.outputs.greeted }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Print greeting
+      shell: bash
+      run: |
+        if [ "${{ inputs.language }}" = "hi" ]; then
+          echo "Namaste, ${{ inputs.name }}!"
+        else
+          echo "Hello, ${{ inputs.name }}!"
+        fi
+
+    - name: Print date and runner OS
+      shell: bash
+      run: |
+        echo "Date: $(date)"
+        echo "Runner OS: $RUNNER_OS"
+
+    - name: Set greeted output
+      id: set-output
+      shell: bash
+      run: echo "greeted=true" >> $GITHUB_OUTPUT

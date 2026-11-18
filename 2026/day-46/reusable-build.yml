@@ -1,0 +1,50 @@
+name: Reusable Build
+
+on:
+  workflow_call:
+    inputs:
+      app_name:
+        description: 'Name of the application'
+        required: true
+        type: string
+      environment:
+        description: 'Target environment'
+        # The task text says "required, default: staging". A default always
+        # supplies a value, so in practice this input behaves as optional.
+        required: true
+        type: string
+        default: 'staging'
+    secrets:
+      docker_token:
+        description: 'Token for Docker registry'
+        required: true
+    outputs:
+      build_version:
+        description: 'Generated build version string'
+        value: ${{ jobs.build.outputs.build_version }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      build_version: ${{ steps.version.outputs.build_version }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Print build info
+        run: echo "Building ${{ inputs.app_name }} for ${{ inputs.environment }}"
+
+      - name: Check secret presence (never print the secret)
+        env:
+          DOCKER_TOKEN: ${{ secrets.docker_token }}
+        run: |
+          if [ -n "$DOCKER_TOKEN" ]; then
+            echo "Docker token is set: true"
+          else
+            echo "Docker token is set: false"
+          fi
+
+      - name: Generate version string
+        id: version
+        run: echo "build_version=v1.0-${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"

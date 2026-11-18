@@ -1,0 +1,26 @@
+name: Call Build
+
+on:
+  push:
+    # This practice repo's default branch is `master`; use `main` if yours differs.
+    branches: [master]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    uses: ./.github/workflows/reusable-build.yml
+    with:
+      app_name: "my-web-app"
+      environment: "production"
+    secrets:
+      docker_token: ${{ secrets.DOCKER_TOKEN }}
+
+  report:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Print build version from reusable workflow
+        run: |
+          echo "Reusable workflow produced version: ${{ needs.build.outputs.build_version }}"

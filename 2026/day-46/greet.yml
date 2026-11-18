@@ -1,0 +1,36 @@
+name: Greet With Composite Action
+
+on:
+  workflow_dispatch:
+    inputs:
+      name:
+        description: 'Who to greet'
+        required: false
+        default: 'Shubham'
+        type: string
+      language:
+        description: 'Greeting language code (en or hi)'
+        required: false
+        default: 'en'
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  greet:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run setup-and-greet composite action
+        id: greet
+        uses: ./.github/actions/setup-and-greet
+        with:
+          name: ${{ inputs.name }}
+          language: ${{ inputs.language }}
+
+      - name: Print greeted output
+        run: |
+          echo "Greeted: ${{ steps.greet.outputs.greeted }}"
