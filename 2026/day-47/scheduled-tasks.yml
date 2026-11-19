@@ -1,0 +1,29 @@
+name: Scheduled Tasks
+
+on:
+  schedule:
+    - cron: '30 2 * * 1'
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+
+jobs:
+  scheduled-job:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Print which schedule triggered
+        run: |
+          if [ "${{ github.event_name }}" = "schedule" ]; then
+            echo "Triggered by cron: ${{ github.event.schedule }}"
+          else
+            echo "Triggered manually via workflow_dispatch"
+          fi
+
+      - name: Health check
+        run: |
+          CODE=$(curl -s -o /dev/null -w "%{http_code}" https://www.google.com)
+          echo "HTTP status: $CODE"
+          if [ "$CODE" -ne 200 ]; then
+            echo "Health check FAILED"
+            exit 1
+          fi
+          echo "Health check PASSED"

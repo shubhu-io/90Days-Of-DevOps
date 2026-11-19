@@ -1,0 +1,15 @@
+name: Smart Triggers
+
+on:
+  push:
+    branches: [main, 'release/*']
+    paths:
+      - 'src/**'
+      - 'app/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: echo "App code changed — building"

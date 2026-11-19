@@ -1,0 +1,56 @@
+name: PR Checks
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  file-size-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Fail on files larger than 1 MB
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          LIMIT=1048576
+          FAIL=0
+          while IFS= read -r f; do
+            [ -f "$f" ] || continue
+            SIZE=$(stat -c%s "$f")
+            if [ "$SIZE" -gt "$LIMIT" ]; then
+              echo "::error file=$f::File exceeds 1 MB ($SIZE bytes)"
+              FAIL=1
+            fi
+          done < <(git diff --name-only "$BASE_SHA" "$HEAD_SHA")
+          exit $FAIL
+
+  branch-name-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Enforce branch naming
+        env:
+          BRANCH: ${{ github.head_ref }}
+        run: |
+          echo "Branch: $BRANCH"
+          if ! echo "$BRANCH" | grep -Eq '^(feature|fix|docs)/'; then
+            echo "::error::Branch '$BRANCH' must start with feature/, fix/, or docs/"
+            exit 1
+          fi
+
+  pr-body-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Warn on empty description
+        env:
+          BODY: ${{ github.event.pull_request.body }}
+        run: |
+          if [ -z "$BODY" ]; then
+            echo "::warning::PR description is empty — please add context"
+          else
+            echo "PR body length: ${#BODY} chars"
+          fi
