@@ -4,6 +4,10 @@ on:
   push:
     branches: [main]
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   build-test:
     uses: ./.github/workflows/reusable-build-test.yml
@@ -15,15 +19,17 @@ jobs:
     needs: build-test
     uses: ./.github/workflows/reusable-docker.yml
     with:
-      image_name: 'dockerhubuser/github-actions-capstone'
+      image_name: ${{ github.repository }}
       tag: 'latest'
+      registry_username: ${{ github.repository_owner }}
     secrets:
-      docker_username: ${{ secrets.DOCKER_USERNAME }}
-      docker_token: ${{ secrets.DOCKER_TOKEN }}
+      docker_token: ${{ secrets.GITHUB_TOKEN }}
 
   deploy:
     needs: docker
     runs-on: ubuntu-latest
     environment: production
     steps:
-      - run: echo "Deploying image: ${{ needs.docker.outputs.image_url }} to production"
+      - name: Deploy
+        run: |
+          echo "Deploying image: ${{ needs.docker.outputs.image_url }} to production"

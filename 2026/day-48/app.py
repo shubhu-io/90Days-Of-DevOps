@@ -3,14 +3,14 @@ from flask import Flask, jsonify
 app = Flask(__name__)
 
 
-@app.route("/")
+@app.get("/")
 def index():
-    return jsonify({"message": "Hello from this DevOps capstone app"})
+    return jsonify(message="Hello from the capstone app v1.1!"), 200
 
 
-@app.route("/health")
+@app.get("/health")
 def health():
-    return jsonify({"status": "ok"}), 200
+    return jsonify(status="ok"), 200
 
 
 if __name__ == "__main__":

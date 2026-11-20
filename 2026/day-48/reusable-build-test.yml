@@ -37,9 +37,8 @@ jobs:
 
       - name: Run tests
         if: ${{ inputs.run_tests }}
-        run: |
-          python -c "import app; c=app.app.test_client(); r=c.get('/health'); assert r.status_code==200, r.status_code; print('Health endpoint OK')"
+        run: python -m unittest -v
 
       - name: Set test result output
         id: result
-        run: echo "test_result=passed" >> $GITHUB_OUTPUT
+        run: echo "test_result=passed" >> "$GITHUB_OUTPUT"

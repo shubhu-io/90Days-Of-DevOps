@@ -5,24 +5,33 @@ on:
     - cron: '0 */12 * * *'
   workflow_dispatch:
 
+permissions:
+  contents: read
+  packages: read
+
 jobs:
   health-check:
     runs-on: ubuntu-latest
+    env:
+      IMAGE: ghcr.io/${{ github.repository }}:latest
     steps:
+      - name: Log in to GitHub Container Registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+
       - name: Pull latest image
-        run: docker pull dockerhubuser/github-actions-capstone:latest
+        run: docker pull "$IMAGE"
 
       - name: Start container
-        run: docker run -d --name app -p 8000:8000 dockerhubuser/github-actions-capstone:latest
+        run: docker run -d --name app -p 8000:8000 "$IMAGE"
 
       - name: Wait and curl health endpoint
         id: check
         run: |
           sleep 5
           CODE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8000/health)
-          echo "http_code=$CODE" >> $GITHUB_OUTPUT
+          echo "http_code=$CODE" >> "$GITHUB_OUTPUT"
           if [ "$CODE" -eq 200 ]; then
-            echo "Health check PASSED"
+            echo "Health check PASSED (HTTP $CODE)"
           else
             echo "Health check FAILED (HTTP $CODE)"
             exit 1
@@ -31,10 +40,10 @@ jobs:
       - name: Write summary
         if: always()
         run: |
-          echo "## Health Check Report" >> $GITHUB_STEP_SUMMARY
-          echo "- Image: myapp:latest" >> $GITHUB_STEP_SUMMARY
-          echo "- Status: ${{ steps.check.outputs.http_code == '200' && 'PASSED' || 'FAILED' }}" >> $GITHUB_STEP_SUMMARY
-          echo "- Time: $(date)" >> $GITHUB_STEP_SUMMARY
+          echo "## Health Check Report" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Image: \`$IMAGE\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Status: ${{ steps.check.outputs.http_code == '200' && 'PASSED' || 'FAILED' }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Time: $(date -u)" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Cleanup container
         if: always()

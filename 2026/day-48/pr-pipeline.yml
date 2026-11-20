@@ -16,4 +16,6 @@ jobs:
     needs: build-test
     runs-on: ubuntu-latest
     steps:
-      - run: echo "PR checks passed for branch: ${{ github.head_ref }} (test_result=${{ needs.build-test.outputs.test_result }})"
+      - name: Summarize PR checks
+        run: |
+          echo "PR checks passed for branch: ${{ github.head_ref }} (test_result=${{ needs.build-test.outputs.test_result }})"
