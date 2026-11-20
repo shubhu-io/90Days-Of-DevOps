@@ -24,7 +24,21 @@ I built a new Flask app instead of reusing an older project:
 **Verification:** locally, `python -m unittest -v` ran 2 tests with `OK`, and
 `curl http://127.0.0.1:8000/health` returned `{"status":"ok"}`.
 
-**Files:** [`app.py`](./app.py) · [`test_app.py`](./test_app.py) · [`Dockerfile`](./Dockerfile) · [`requirements.txt`](./requirements.txt)
+**Files:** [`app/app.py`](./app/app.py) · [`app/test_app.py`](./app/test_app.py) · [`app/Dockerfile`](./app/Dockerfile) · [`app/requirements.txt`](./app/requirements.txt)
+
+The folder mirrors the live repo, grouped so the notes stay readable:
+
+```text
+day-48/
+├── day-48-actions-project.md   this file
+├── README.md                   task brief
+├── app/                        application code and container files
+├── workflows/                  the five GitHub Actions files
+├── screenshots/                run evidence
+└── trivy-report.txt            scan output
+```
+
+`app/` maps to the repo root and `workflows/` maps to `.github/workflows/`.
 
 ---
 
@@ -36,7 +50,7 @@ and returns `test_result` to the caller.
 
 **Verification:** every call finished green in about 15-20 seconds.
 
-**Workflow:** [`reusable-build-test.yml`](./reusable-build-test.yml)
+**Workflow:** [`reusable-build-test.yml`](./workflows/reusable-build-test.yml)
 
 ---
 
@@ -53,7 +67,7 @@ ghcr.io/shubhu-io/github-actions-capstone:latest
 ghcr.io/shubhu-io/github-actions-capstone:sha-6b42050
 ```
 
-**Workflow:** [`reusable-docker.yml`](./reusable-docker.yml)
+**Workflow:** [`reusable-docker.yml`](./workflows/reusable-docker.yml)
 
 ---
 
@@ -70,7 +84,7 @@ ran only `build-test` and `pr-comment`, finished in 20s, and published no image.
 
 ![PR merged with both checks passing](./screenshots/actions-pr-merged.png)
 
-**Workflow:** [`pr-pipeline.yml`](./pr-pipeline.yml)
+**Workflow:** [`pr-pipeline.yml`](./workflows/pr-pipeline.yml)
 
 ---
 
@@ -97,7 +111,7 @@ While waiting, the run page shows the gate clearly:
 
 ![Package versions: latest and sha-*](./screenshots/ghcr-package-versions.png)
 
-**Workflow:** [`main-pipeline.yml`](./main-pipeline.yml)
+**Workflow:** [`main-pipeline.yml`](./workflows/main-pipeline.yml)
 
 ---
 
@@ -116,7 +130,7 @@ The result is also written to the run summary with `$GITHUB_STEP_SUMMARY`.
 
 ![Health check run, all steps green](./screenshots/actions-health-check.png)
 
-**Workflow:** [`health-check.yml`](./health-check.yml)
+**Workflow:** [`health-check.yml`](./workflows/health-check.yml)
 
 ---
 
@@ -168,7 +182,7 @@ Python packages (`flask 3.1.3`, `jinja2 3.1.6`, `werkzeug 3.1.9`).
 
 The full report is saved at [`trivy-report.txt`](./trivy-report.txt).
 
-**Workflow:** [`main-pipeline.yml`](./main-pipeline.yml)
+**Workflow:** [`main-pipeline.yml`](./workflows/main-pipeline.yml)
 
 ---
 
