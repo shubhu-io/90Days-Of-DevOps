@@ -1,0 +1,45 @@
+name: Reusable Build & Test
+
+on:
+  workflow_call:
+    inputs:
+      python_version:
+        description: 'Python version to use'
+        required: false
+        type: string
+        default: '3.12'
+      run_tests:
+        description: 'Whether to run tests'
+        required: false
+        type: boolean
+        default: true
+    outputs:
+      test_result:
+        description: 'passed or failed'
+        value: ${{ jobs.build-test.outputs.test_result }}
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    outputs:
+      test_result: ${{ steps.result.outputs.test_result }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ inputs.python_version }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run tests
+        if: ${{ inputs.run_tests }}
+        run: |
+          python -c "import app; c=app.app.test_client(); r=c.get('/health'); assert r.status_code==200, r.status_code; print('Health endpoint OK')"
+
+      - name: Set test result output
+        id: result
+        run: echo "test_result=passed" >> $GITHUB_OUTPUT

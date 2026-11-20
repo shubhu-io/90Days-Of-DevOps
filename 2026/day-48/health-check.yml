@@ -1,0 +1,41 @@
+name: Health Check
+
+on:
+  schedule:
+    - cron: '0 */12 * * *'
+  workflow_dispatch:
+
+jobs:
+  health-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pull latest image
+        run: docker pull dockerhubuser/github-actions-capstone:latest
+
+      - name: Start container
+        run: docker run -d --name app -p 8000:8000 dockerhubuser/github-actions-capstone:latest
+
+      - name: Wait and curl health endpoint
+        id: check
+        run: |
+          sleep 5
+          CODE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8000/health)
+          echo "http_code=$CODE" >> $GITHUB_OUTPUT
+          if [ "$CODE" -eq 200 ]; then
+            echo "Health check PASSED"
+          else
+            echo "Health check FAILED (HTTP $CODE)"
+            exit 1
+          fi
+
+      - name: Write summary
+        if: always()
+        run: |
+          echo "## Health Check Report" >> $GITHUB_STEP_SUMMARY
+          echo "- Image: myapp:latest" >> $GITHUB_STEP_SUMMARY
+          echo "- Status: ${{ steps.check.outputs.http_code == '200' && 'PASSED' || 'FAILED' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Time: $(date)" >> $GITHUB_STEP_SUMMARY
+
+      - name: Cleanup container
+        if: always()
+        run: docker rm -f app
