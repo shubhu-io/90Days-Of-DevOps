@@ -76,17 +76,22 @@ ran only `build-test` and `pr-comment`, finished in 20s, and published no image.
 
 ## Task 5: Main Branch Pipeline
 
-`.github/workflows/main-pipeline.yml` runs on `push` to `main`. Three jobs run in
-order: `build-test` → `docker` → `deploy`. The deploy job uses
-`environment: production`.
+`.github/workflows/main-pipeline.yml` runs on `push` to `main`. Four jobs run in
+order: `build-test` → `docker` → `scan` → `deploy`. The deploy job uses
+`environment: production`, which requires a reviewer.
 
-**Verification:** merging the PR ran the full chain in 53 seconds and printed:
+**Verification:** the latest run finished in 1m 22s. The deploy waited for approval,
+then printed:
 
 ```text
 Deploying image: ghcr.io/shubhu-io/github-actions-capstone:latest to production
 ```
 
-![Main pipeline: build-test, docker, deploy](./screenshots/actions-main-pipeline.png)
+![Main pipeline: build-test, docker, scan, deploy - approved](screenshots/actions-main-pipeline.png)
+
+While waiting, the run page shows the gate clearly:
+
+![Production requires an approval before deploy starts](screenshots/actions-production-approval.png)
 
 ![Deploy job, all steps green](./screenshots/actions-deploy-job.png)
 
@@ -131,7 +136,7 @@ subgraph PR["Pull Request"]
 end
 
 subgraph MAIN["Merge to main"]
-  D["Push to main"] --> E["Reusable build & test"] --> F["Docker build & push<br/>latest + sha-commit"] --> G["Deploy<br/>production environment"]
+  D["Push to main"] --> E["Reusable build & test"] --> F["Docker build & push<br/>latest + sha-commit"] --> S["Trivy scan<br/>CRITICAL gate"] --> G["Deploy<br/>approved for production"]
 end
 
 subgraph HEALTH["Every 12 hours"]
@@ -145,33 +150,54 @@ end
 |---|---|
 | Slack or Teams alert on failure | Know about a red `main` in seconds |
 | Staging environment before production | Catch problems before the real deploy |
-| Trivy scan before the push | Block CRITICAL CVEs (Day 49) |
 | Rollback to the last `sha-*` tag | Recover from a bad health check |
+
+---
+
+## Brownie Points: Security Gate with Trivy
+
+The `scan` job runs after the image is pushed and before the deploy starts:
+
+- Scans the published image for `CRITICAL` vulnerabilities
+- Fails the pipeline on a finding (`exit-code: '1'`)
+- Ignores unfixed findings so a base-image CVE with no patch cannot block every release
+- Uploads the report as the `trivy-report` artifact
+
+Real report from the latest run: **0 critical findings** across Debian 13.7 and the
+Python packages (`flask 3.1.3`, `jinja2 3.1.6`, `werkzeug 3.1.9`).
+
+The full report is saved at [`trivy-report.txt`](./trivy-report.txt).
+
+**Workflow:** [`main-pipeline.yml`](./main-pipeline.yml)
 
 ---
 
 ## Outcome
 
-A working pipeline where pull requests only test, merges to `main` publish an image
-and deploy it, and a scheduled job keeps checking that the published image is healthy.
+A working pipeline where pull requests only test, merges to `main` publish an image,
+scan it for CRITICAL CVEs, and deploy it after approval, while a scheduled job keeps
+checking that the published image is healthy.
 
 ### Key Learnings
 
 - **Reusable workflows keep the repo DRY.** Test and build logic exist once and are called from both the PR and main pipelines.
 - **PRs must stay registry-blind.** Untrusted code never receives push credentials.
-- **`needs:` gives a real release order.** Test, then publish, then deploy - never in parallel.
+- **`needs:` gives a real release order.** Test, then publish, scan, then deploy - never in parallel.
 - **A colon inside a plain YAML value breaks the workflow.** `run: echo "Deploying image: ..."` failed in 0 seconds until I switched to `run: |`.
 - **GitHub skips outputs that contain a secret.** Passing the registry username as a secret hid `image_url`, so only the token is secret now.
+- **Actions tags need their real prefix.** `trivy-action@0.28.0` does not exist; the tag is `v0.36.0`. A wrong ref fails during job setup, before any scan runs.
+- **Environment protection is one setting.** Adding a reviewer to `production` paused the deploy until it was approved, with no workflow changes.
 - **Scheduled workflows only run from the default branch.** Test them with `workflow_dispatch`.
 
 ### Notes on this build
 
 - **Registry:** GHCR instead of Docker Hub. The Docker Hub token on my older practice repo was expired (`unauthorized`), and GHCR works with the built-in `GITHUB_TOKEN`.
 - **PR badge:** removed, because a `pull_request`-only workflow has no run on `main` and the badge reports "failing".
-- **Trivy:** intentionally left for Day 49.
+- **Self-review:** `prevent_self_review` is off, so the same account can approve its own deploy. A team should leave it on.
 
 ### Run history
 
-- [Main #4 - merge to main, 53s](https://github.com/shubhu-io/github-actions-capstone/actions/runs/44673520831)
+- [Main #8 - test, image, scan, approved deploy, 1m22s](https://github.com/shubhu-io/github-actions-capstone/actions/runs/44678076398)
+- [Main #4 - first full merge run, 53s](https://github.com/shubhu-io/github-actions-capstone/actions/runs/44673520831)
 - [PR #2 - tests only, 20s](https://github.com/shubhu-io/github-actions-capstone/actions/runs/44673441396)
 - [Health Check #1 - HTTP 200, 17s](https://github.com/shubhu-io/github-actions-capstone/actions/runs/44673626638)
