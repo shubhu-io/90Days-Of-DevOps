@@ -1,87 +1,107 @@
-# Day 48 - My First Real CI/CD Pipeline
+# Day 48 - GitHub Actions Project: End-to-End CI/CD Pipeline
 
-A small Flask app that ships itself. Every merge to `main` runs the tests, builds a
-container image, and deploys it. Pull requests only run tests.
+This is a real, working capstone: a Flask app that tests, builds, publishes, and
+deploys itself with GitHub Actions.
 
-- Repo: <https://github.com/shubhu-io/github-actions-capstone>
-- Image: `ghcr.io/shubhu-io/github-actions-capstone:latest`
+- **Repository:** [github-actions-capstone](https://github.com/shubhu-io/github-actions-capstone)
+- **Image:** `ghcr.io/shubhu-io/github-actions-capstone:latest`
+- **Package:** [GHCR package](https://github.com/shubhu-io/github-actions-capstone/pkgs/container/github-actions-capstone)
 
-## The pipeline in one picture
+> **Goal:** one pipeline with reusable workflows, image publishing, a protected
+> production deploy, and a scheduled health check - all verified by real runs.
+
+---
+
+## Task 1: Set Up the Project Repository
+
+I built a new Flask app instead of reusing an older project:
+
+- `/` returns a hello message, `/health` returns `{"status":"ok"}`
+- `test_app.py` covers both routes with the stdlib `unittest` runner
+- `Dockerfile` packages the app on `python:3.12-slim`
+- `README.md` documents the app and the pipeline
+
+**Verification:** locally, `python -m unittest -v` ran 2 tests with `OK`, and
+`curl http://127.0.0.1:8000/health` returned `{"status":"ok"}`.
+
+**Files:** [`app.py`](./app.py) · [`test_app.py`](./test_app.py) · [`Dockerfile`](./Dockerfile) · [`requirements.txt`](./requirements.txt)
+
+---
+
+## Task 2: Reusable Workflow - Build & Test
+
+`.github/workflows/reusable-build-test.yml` runs on `workflow_call` and takes
+`python_version` and `run_tests` as inputs. It installs dependencies, runs the tests,
+and returns `test_result` to the caller.
+
+**Verification:** every call finished green in about 15-20 seconds.
+
+**Workflow:** [`reusable-build-test.yml`](./reusable-build-test.yml)
+
+---
+
+## Task 3: Reusable Workflow - Docker Build & Push
+
+`.github/workflows/reusable-docker.yml` logs in to the registry, builds the image,
+and pushes two tags: `latest` and `sha-<short-commit>`. It returns `image_url` to the
+caller.
+
+**Verification:** the merge run pushed both tags in one build:
 
 ```text
-PR opened
-  └─ test ─► "checks passed"        (no image is built)
-
-Merge to main
-  └─ test ─► build + push image ─► deploy
-             (latest + sha-<commit>)
-
-Every 12 hours
-  └─ pull image ─► start container ─► curl /health ─► write report
+ghcr.io/shubhu-io/github-actions-capstone:latest
+ghcr.io/shubhu-io/github-actions-capstone:sha-6b42050
 ```
 
-## Files
+**Workflow:** [`reusable-docker.yml`](./reusable-docker.yml)
 
-| File | What it does |
-|---|---|
-| `app.py` | Flask app with `/` and `/health` |
-| `test_app.py` | Two unit tests, run with `python -m unittest` |
-| `Dockerfile` | Packages the app on `python:3.12-slim` |
-| `reusable-build-test.yml` | Shared test job, returns `test_result` |
-| `reusable-docker.yml` | Shared image build + push, returns `image_url` |
-| `pr-pipeline.yml` | Runs tests on pull requests only |
-| `main-pipeline.yml` | Tests, pushes the image, then deploys |
-| `health-check.yml` | Probes the live image every 12 hours |
+---
 
-The two `reusable-*` files are called by the other pipelines, so the test and build
-logic exist in one place only.
+## Task 4: PR Pipeline
 
-## 1. Pull request: tests only
+`.github/workflows/pr-pipeline.yml` runs on `pull_request` (`opened`, `synchronize`).
+It calls the build-test workflow and then prints a summary. There is no docker job
+and no registry credentials in this file.
 
-![PR run with only build-test and pr-comment](screenshots/actions-pr-pipeline.png)
+**Verification:** PR [#1](https://github.com/shubhu-io/github-actions-capstone/pull/1)
+ran only `build-test` and `pr-comment`, finished in 20s, and published no image.
 
-The PR run has two jobs: `build-test` and `pr-comment`. There is no docker job, and
-this workflow has no registry credentials at all. A pull request cannot publish an
-image, even if someone edits the code.
+![PR run with only build-test and pr-comment](./screenshots/actions-pr-pipeline.png)
 
-```text
-PR checks passed for branch: feature/capstone-pr (test_result=passed)
-```
+![PR merged with both checks passing](./screenshots/actions-pr-merged.png)
 
-After merging, both checks show green on the PR:
+**Workflow:** [`pr-pipeline.yml`](./pr-pipeline.yml)
 
-![PR merged with both checks passing](screenshots/actions-pr-merged.png)
+---
 
-## 2. Merge to main: the full release
+## Task 5: Main Branch Pipeline
 
-![Main pipeline: build-test, docker, deploy](screenshots/actions-main-pipeline.png)
+`.github/workflows/main-pipeline.yml` runs on `push` to `main`. Three jobs run in
+order: `build-test` → `docker` → `deploy`. The deploy job uses
+`environment: production`.
 
-Three jobs run in order, each one waiting for the previous:
-
-1. `build-test` runs the unit tests.
-2. `docker` pushes two tags: `latest` and `sha-<commit>`.
-3. `deploy` runs behind the `production` environment.
+**Verification:** merging the PR ran the full chain in 53 seconds and printed:
 
 ```text
-image.name: ghcr.io/shubhu-io/github-actions-capstone:latest,ghcr.io/...:sha-6b42050
 Deploying image: ghcr.io/shubhu-io/github-actions-capstone:latest to production
 ```
 
-![Deploy job, all steps green](screenshots/actions-deploy-job.png)
+![Main pipeline: build-test, docker, deploy](./screenshots/actions-main-pipeline.png)
 
-Both tags are visible on the package page:
+![Deploy job, all steps green](./screenshots/actions-deploy-job.png)
 
-![Package versions: latest and sha-*](screenshots/ghcr-package-versions.png)
+![Package versions: latest and sha-*](./screenshots/ghcr-package-versions.png)
 
-`latest` is easy for humans to pull. `sha-<commit>` is exact, so a deploy can always
-be traced back to one commit.
+**Workflow:** [`main-pipeline.yml`](./main-pipeline.yml)
 
-## 3. Scheduled health check
+---
 
-![Health check run, all steps green](screenshots/actions-health-check.png)
+## Task 6: Scheduled Health Check
 
-Every 12 hours (and on demand with `workflow_dispatch`) the job pulls the published
-image, starts it, and calls `/health`:
+`.github/workflows/health-check.yml` runs every 12 hours and on demand. It pulls the
+published image, starts the container, waits 5 seconds, and calls `/health`.
+
+**Verification:** the manual run finished in 17 seconds with:
 
 ```text
 Health check PASSED (HTTP 200)
@@ -89,44 +109,69 @@ Health check PASSED (HTTP 200)
 
 The result is also written to the run summary with `$GITHUB_STEP_SUMMARY`.
 
-## Running it yourself
+![Health check run, all steps green](./screenshots/actions-health-check.png)
 
-```bash
-python -m venv .venv
-.venv/Scripts/python -m pip install -r requirements.txt
-.venv/Scripts/python -m unittest -v
-.venv/Scripts/python app.py
-curl http://127.0.0.1:8000/health
+**Workflow:** [`health-check.yml`](./health-check.yml)
+
+---
+
+## Task 7: Badges & Documentation
+
+The repo README shows live badges for the two workflows that run on `main`:
+
+![README with passing badges](./screenshots/readme-badges.png)
+
+### Pipeline Architecture
+
+```mermaid
+flowchart LR
+
+subgraph PR["Pull Request"]
+  A["PR opened / updated"] --> B["Reusable build & test"] --> C["PR checks passed"]
+end
+
+subgraph MAIN["Merge to main"]
+  D["Push to main"] --> E["Reusable build & test"] --> F["Docker build & push<br/>latest + sha-commit"] --> G["Deploy<br/>production environment"]
+end
+
+subgraph HEALTH["Every 12 hours"]
+  H["Schedule / manual run"] --> I["Pull image"] --> J["Start container"] --> K["GET /health"] --> L["Job summary"]
+end
 ```
 
-```bash
-gh workflow list
-gh run list
-gh workflow run health-check.yml
-```
+### What I would add next
 
-## What I learned
+| Improvement | Why |
+|---|---|
+| Slack or Teams alert on failure | Know about a red `main` in seconds |
+| Staging environment before production | Catch problems before the real deploy |
+| Trivy scan before the push | Block CRITICAL CVEs (Day 49) |
+| Rollback to the last `sha-*` tag | Recover from a bad health check |
 
-- **A colon inside a plain YAML value breaks the whole workflow.** `run: echo "Deploying image: ..."` looks fine but is invalid YAML. GitHub fails the run in 0 seconds with "workflow file issue". Using `run: |` fixes it.
-- **GitHub hides outputs that contain a secret.** When the registry username was a secret, the image URL was skipped and deploy printed nothing. Only the token needs to be secret.
-- **PRs should never get push credentials.** Keeping the docker job out of the PR pipeline is a security boundary, not just a shortcut.
-- **`environment: production` must exist first.** The deploy job fails at startup if the environment has not been created.
+---
+
+## Outcome
+
+A working pipeline where pull requests only test, merges to `main` publish an image
+and deploy it, and a scheduled job keeps checking that the published image is healthy.
+
+### Key Learnings
+
+- **Reusable workflows keep the repo DRY.** Test and build logic exist once and are called from both the PR and main pipelines.
+- **PRs must stay registry-blind.** Untrusted code never receives push credentials.
+- **`needs:` gives a real release order.** Test, then publish, then deploy - never in parallel.
+- **A colon inside a plain YAML value breaks the workflow.** `run: echo "Deploying image: ..."` failed in 0 seconds until I switched to `run: |`.
+- **GitHub skips outputs that contain a secret.** Passing the registry username as a secret hid `image_url`, so only the token is secret now.
 - **Scheduled workflows only run from the default branch.** Test them with `workflow_dispatch`.
-- **Badges lie for PR-only workflows.** There is no run on `main`, so the badge reports "failing". Only badge workflows that run on `main`.
 
-## Where I changed the plan
+### Notes on this build
 
-- **Used GHCR instead of Docker Hub.** The Docker Hub token on my older practice repo was expired (`unauthorized: incorrect username or password`). GHCR works with the built-in `GITHUB_TOKEN`, so there is no long-lived secret to leak or forget.
-- **Passed the username as an input, not a secret.** This avoids the masking problem above. Only `docker_token` is a secret.
-- **Removed the PR badge.** A `pull_request`-only workflow has no default-branch run to report.
+- **Registry:** GHCR instead of Docker Hub. The Docker Hub token on my older practice repo was expired (`unauthorized`), and GHCR works with the built-in `GITHUB_TOKEN`.
+- **PR badge:** removed, because a `pull_request`-only workflow has no run on `main` and the badge reports "failing".
+- **Trivy:** intentionally left for Day 49.
 
-## Run history
+### Run history
 
 - [Main #4 - merge to main, 53s](https://github.com/shubhu-io/github-actions-capstone/actions/runs/44673520831)
 - [PR #2 - tests only, 20s](https://github.com/shubhu-io/github-actions-capstone/actions/runs/44673441396)
 - [Health Check #1 - HTTP 200, 17s](https://github.com/shubhu-io/github-actions-capstone/actions/runs/44673626638)
-- [Main #5 - latest run](https://github.com/shubhu-io/github-actions-capstone/actions/runs/44673876695)
-
-The README badges are live:
-
-![README with passing badges](screenshots/readme-badges.png)
