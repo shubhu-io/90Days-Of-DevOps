@@ -1,0 +1,35 @@
+name: PR Pipeline
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  build-test:
+    uses: ./.github/workflows/reusable-build-test.yml
+    with:
+      python_version: '3.12'
+      run_tests: true
+
+  dependency-review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Review new dependencies
+        uses: actions/dependency-review-action@v5
+        with:
+          fail-on-severity: critical
+
+  pr-comment:
+    needs: [build-test, dependency-review]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Summarize PR checks
+        run: |
+          echo "PR checks passed for branch: ${{ github.head_ref }} (test_result=${{ needs.build-test.outputs.test_result }})"
