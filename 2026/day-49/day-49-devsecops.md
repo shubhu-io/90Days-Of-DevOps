@@ -8,6 +8,81 @@ blocks a release when it finds something serious.
 - **Runs:** [Actions](https://github.com/shubhu-io/github-actions-capstone/actions)
 - **Trivy report from the failed run:** [`trivy-report.txt`](./trivy-report.txt)
 
+## Basic steps (in order)
+
+These are the minimum changes. The full files are in [`workflows/`](./workflows).
+
+**1. Add an image scan job** to `main-pipeline.yml`, after `docker`:
+
+```yaml
+  scan:
+    needs: docker
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+      security-events: write
+    steps:
+      - name: Log in to the registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+
+      - name: Trivy scan
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: ${{ needs.docker.outputs.image_url }}
+          format: 'table'
+          severity: 'CRITICAL,HIGH'
+          ignore-unfixed: true
+          exit-code: '1'
+```
+
+**2. Make deploy wait for the scan:** `needs: [docker, scan]`.
+
+**3. Push to `main` and open the Actions tab.** Read the table in the `scan` job. If it
+fails, the deploy is skipped - that is the gate working.
+
+**4. Fix what it finds.** For a base-image CVE, upgrade packages in the `Dockerfile`:
+
+```dockerfile
+RUN apt-get update && apt-get -y upgrade && rm -rf /var/lib/apt/lists/*
+```
+
+**5. Turn on secret scanning** in Settings -> Code security and analysis. Enable
+**Secret scanning** and **Push protection**. Or do it from the CLI:
+
+```bash
+gh api -X PATCH repos/<owner>/<repo> --input - <<'JSON'
+{"security_and_analysis":{"secret_scanning":{"status":"enabled"},"secret_scanning_push_protection":{"status":"enabled"}}}
+JSON
+```
+
+**6. Add dependency review** to `pr-pipeline.yml`:
+
+```yaml
+  dependency-review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/dependency-review-action@v5
+        with:
+          fail-on-severity: critical
+```
+
+**7. Lock permissions** at the top of each workflow:
+
+```yaml
+permissions:
+  contents: read
+```
+
+Add `pull-requests: write` only if the workflow comments on a PR, and
+`packages: write` only where it pushes an image.
+
+**8. Test it.** Open a PR that adds a vulnerable package (for example `pyyaml==5.3`).
+Dependency review should fail. Remove it and the check should pass.
+
+---
+
 ## The secure pipeline
 
 ```mermaid
