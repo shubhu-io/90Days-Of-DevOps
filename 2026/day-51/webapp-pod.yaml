@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: webapp-pod
+  labels:
+    app: webapp
+    environment: staging
+    team: payments
+spec:
+  containers:
+  - name: webapp
+    image: nginx:latest
