@@ -1,0 +1,12 @@
+# kind cluster for Day 53.
+# The extraPortMappings entry is what makes the NodePort reachable from the
+# Windows/macOS host at http://localhost:30080 (without it, localhost:30080
+# only exists inside the kind node container).
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+nodes:
+- role: control-plane
+  extraPortMappings:
+  - containerPort: 30080
+    hostPort: 30080
+    protocol: TCP
