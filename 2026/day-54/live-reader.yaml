@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: live-reader
+spec:
+  restartPolicy: Never
+  containers:
+  - name: busybox
+    image: busybox:latest
+    command: ['sh', '-c', 'while true; do echo "message: $(cat /etc/live/message)"; sleep 5; done']
+    volumeMounts:
+    - name: live
+      mountPath: /etc/live
+  volumes:
+  - name: live
+    configMap:
+      name: live-config
