@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: emptydir-demo
+spec:
+  restartPolicy: Never
+  containers:
+  - name: writer
+    image: busybox:latest
+    command: ["sh", "-c", "echo \"hello $(date -u +%FT%TZ)\" > /data/message.txt; cat /data/message.txt; sleep 3600"]
+    volumeMounts:
+    - name: scratch
+      mountPath: /data
+  volumes:
+  - name: scratch
+    emptyDir: {}
